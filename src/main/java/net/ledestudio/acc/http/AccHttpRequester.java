@@ -69,6 +69,8 @@ public class AccHttpRequester {
                 result.put(AccHttpResponseType.TITLE, channel.get("TITLE").getAsString());
                 result.put(AccHttpResponseType.BJID, channel.get("BJID").getAsString());
                 result.put(AccHttpResponseType.CHPT, Integer.toString(channel.get("CHPT").getAsInt() + 1));
+                result.put(AccHttpResponseType.BID, bid);
+                result.put(AccHttpResponseType.BNO, bno);
                 return result;
             } catch (IOException e) {
                 System.err.println("An error occurred during HTTP request execution: " + e.getMessage());
