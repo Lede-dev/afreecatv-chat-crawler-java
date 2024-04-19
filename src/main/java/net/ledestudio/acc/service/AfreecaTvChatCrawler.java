@@ -62,8 +62,6 @@ public class AfreecaTvChatCrawler {
                 final CompletableFuture<AccHttpRequestResult> future = requester.request();
                 this.result = future.get();
 
-                System.out.println(result.toWebSocketUrlString());
-
                 // Create Draft
                 Draft_6455 draft = new Draft_6455(Lists.newArrayList(),
                         Lists.newArrayList(new Protocol("chat")));
