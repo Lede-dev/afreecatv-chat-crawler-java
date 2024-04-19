@@ -1,6 +1,5 @@
 package net.ledestudio.acc.http;
 
-import com.google.common.collect.Maps;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import org.apache.http.HttpEntity;
