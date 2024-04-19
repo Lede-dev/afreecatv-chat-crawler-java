@@ -1,5 +1,6 @@
 package net.ledestudio.acc.http;
 
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import org.apache.http.HttpEntity;
@@ -9,6 +10,7 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -41,7 +43,7 @@ public class AccHttpRequester {
         this.bno = split[1];
     }
 
-    public @NotNull CompletableFuture<AccHttpRequestResult> request() {
+    public @NotNull CompletableFuture<@Nullable AccHttpRequestResult> request() {
         return CompletableFuture.supplyAsync(() -> {
             String url = "https://live.afreecatv.com/afreeca/player_live_api.php";
 
@@ -58,7 +60,14 @@ public class AccHttpRequester {
                 String responseStr = EntityUtils.toString(entity, StandardCharsets.UTF_8);
 
                 JsonObject root = JsonParser.parseString(responseStr).getAsJsonObject();
+                if (root == null || !root.has("CHANNEL")) {
+                    return null;
+                }
+
                 JsonObject channel = root.getAsJsonObject("CHANNEL");
+                if (channel == null || !channel.has("CHDOMAIN")) {
+                    return null;
+                }
 
                 // mapping result
                 AccHttpRequestResult result = new AccHttpRequestResult();
@@ -75,8 +84,7 @@ public class AccHttpRequester {
                 System.err.println("An error occurred during HTTP request execution: " + e.getMessage());
             }
 
-            // return empty result
-            return new AccHttpRequestResult();
+            return null;
         });
     }
 

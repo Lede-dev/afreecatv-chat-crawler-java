@@ -9,6 +9,7 @@ import net.ledestudio.acc.service.AfreecaTvMessageReceiveEvent;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.drafts.Draft_6455;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.Test;
 
 import java.time.format.DateTimeFormatter;
@@ -19,8 +20,14 @@ public class AccWebSocketTest {
     @Test
     public void accWebSocketClientConnectTest() throws ExecutionException, InterruptedException {
         AccHttpRequester requester = new AccHttpRequester("https://play.afreecatv.com/seokwngud/262914674");
-        CompletableFuture<AccHttpRequestResult> future = requester.request();
-        WebSocketClient client = new AccClient(future.get(), new Draft_6455());
+        CompletableFuture<@Nullable AccHttpRequestResult> future = requester.request();
+        AccHttpRequestResult result = future.get();
+        if (result == null) {
+            System.out.println("Cannot found live broadcast information");
+            return;
+        }
+
+        WebSocketClient client = new AccClient(result, new Draft_6455());
         client.connectBlocking();
     }
 

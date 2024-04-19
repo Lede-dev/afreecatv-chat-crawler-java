@@ -17,8 +17,11 @@ import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Set;
 import java.util.concurrent.*;
+import java.util.logging.Logger;
 
 public class AfreecaTvChatCrawler {
+
+    private static final Logger LOGGER = Logger.getLogger(AfreecaTvChatCrawler.class.getSimpleName());
 
     private AccClient client;
     private AccHttpRequestResult result;
@@ -65,9 +68,12 @@ public class AfreecaTvChatCrawler {
         Executors.newSingleThreadExecutor().execute(() -> {
             try {
                 // Request AfreecaTv Live Information
-                final AccHttpRequester requester = new AccHttpRequester(url);
-                final CompletableFuture<AccHttpRequestResult> future = requester.request();
-                this.result = future.get();
+                this.result = getLiveBroadcastResult();
+
+                if (result == null) {
+                    LOGGER.warning("Unable to find live broadcast information.");
+                    return;
+                }
 
                 // Create Draft
                 Draft_6455 draft = new Draft_6455(Lists.newArrayList(),
@@ -103,9 +109,16 @@ public class AfreecaTvChatCrawler {
     public void reconnect() {
         if (client != null) {
             try {
+                this.result = getLiveBroadcastResult();
+                if (result == null) {
+                    LOGGER.warning("Unable to find live broadcast information.");
+                    close();
+                    return;
+                }
+
                 client.reconnectBlocking();
                 sendPacket();
-            } catch (InterruptedException e) {
+            } catch (InterruptedException | ExecutionException e) {
                 e.printStackTrace();
             }
         }
@@ -118,6 +131,12 @@ public class AfreecaTvChatCrawler {
         if (client != null) {
             client.close();
         }
+    }
+
+    private @Nullable AccHttpRequestResult getLiveBroadcastResult() throws ExecutionException, InterruptedException {
+        final AccHttpRequester requester = new AccHttpRequester(url);
+        final CompletableFuture<AccHttpRequestResult> future = requester.request();
+        return future.get();
     }
 
     private void sendPacket() {
@@ -136,7 +155,6 @@ public class AfreecaTvChatCrawler {
         // Repeatedly Sending Ping Packet
         scheduler = Executors.newSingleThreadScheduledExecutor();
         scheduler.scheduleAtFixedRate(() -> {
-            System.out.println("Send Ping Packet");
             client.send(AccConstants.createPingPacket());
         }, AccConstants.PING_PACKET_PERIOD_SECONDS, AccConstants.PING_PACKET_PERIOD_SECONDS, TimeUnit.SECONDS);
     }

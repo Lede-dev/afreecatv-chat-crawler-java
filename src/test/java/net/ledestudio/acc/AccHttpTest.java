@@ -14,6 +14,11 @@ public class AccHttpTest {
         AccHttpRequester requester = new AccHttpRequester("https://play.afreecatv.com/seokwngud/262914674");
         CompletableFuture<AccHttpRequestResult> future = requester.request();
         AccHttpRequestResult result = future.get();
+
+        if (result == null) {
+            System.out.println("Cannot found live broadcast information");
+            return;
+        }
         System.out.println(result.toString());
     }
 
