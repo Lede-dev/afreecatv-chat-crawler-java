@@ -8,8 +8,8 @@ import java.nio.charset.StandardCharsets;
 
 public class AccConstants {
 
-    public static final String F = "\\x0c";
-    public static final String ESC = "\\x1b\\t";
+    public static final String F = "\u000c";
+    public static final String ESC = "\u001b\t";
 
     public static String createConnectPacket() {
         return String.format("%s000100000600%s16%s", ESC, F.repeat(3), F);
