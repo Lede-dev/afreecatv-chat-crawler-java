@@ -2,25 +2,22 @@ package net.ledestudio.acc.service;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import net.ledestudio.acc.client.AccClient;
 import net.ledestudio.acc.client.AccClientHandler;
 import net.ledestudio.acc.http.AccHttpRequestResult;
 import net.ledestudio.acc.http.AccHttpRequester;
 import net.ledestudio.acc.util.AccConstants;
-import org.apache.http.ssl.SSLContextBuilder;
 import org.java_websocket.drafts.Draft_6455;
 import org.java_websocket.enums.ReadyState;
-import org.java_websocket.protocols.IProtocol;
 import org.java_websocket.protocols.Protocol;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.net.ssl.SSLContext;
 import java.security.KeyManagementException;
-import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
-import java.util.List;
-import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
@@ -31,6 +28,7 @@ public class AfreecaTvChatCrawler {
     private AccHttpRequestResult result;
 
     private final @NotNull String url;
+    private final Set<AfreecaTvMessageReceiveEvent> events;
 
     public AfreecaTvChatCrawler(@NotNull String bid, int bno) {
         this(bid, Integer.toString(bno));
@@ -42,6 +40,19 @@ public class AfreecaTvChatCrawler {
 
     public AfreecaTvChatCrawler(@NotNull String afreecaTvLiveUrl) {
         this.url = afreecaTvLiveUrl;
+        this.events = Sets.newHashSet();
+    }
+
+    public void registerMessageReceiveEvent(@NotNull AfreecaTvMessageReceiveEvent event) {
+        events.add(event);
+    }
+
+    public void unregisterMessageReceiveEvent(@NotNull AfreecaTvMessageReceiveEvent event) {
+        events.remove(event);
+    }
+
+    public Set<AfreecaTvMessageReceiveEvent> getEvents() {
+        return events;
     }
 
     public void connect() {
@@ -67,7 +78,8 @@ public class AfreecaTvChatCrawler {
                 client.setSocketFactory(sslContext.getSocketFactory());
 
                 // Create and Add Client Handler
-                AccClientHandler handler = new AfreecaTvChatClientHandler();
+                AccClientHandler handler = new AfreecaTvChatClientHandler(this);
+
                 client.addHandler(handler);
 
                 // Wait Connecting

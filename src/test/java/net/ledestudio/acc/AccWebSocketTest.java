@@ -1,6 +1,5 @@
 package net.ledestudio.acc;
 
-import com.google.common.collect.Maps;
 import net.ledestudio.acc.client.AccClient;
 import net.ledestudio.acc.http.AccHttpRequestResult;
 import net.ledestudio.acc.http.AccHttpRequester;

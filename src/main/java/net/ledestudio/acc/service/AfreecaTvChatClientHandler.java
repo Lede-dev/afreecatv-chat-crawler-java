@@ -9,34 +9,40 @@ import java.nio.ByteBuffer;
 
 public class AfreecaTvChatClientHandler extends AccClientHandler {
 
+    private final @NotNull AfreecaTvChatCrawler crawler;
+
+    public AfreecaTvChatClientHandler(@NotNull AfreecaTvChatCrawler crawler) {
+        this.crawler = crawler;
+    }
+
     @Override
     public void onOpen(@NotNull ServerHandshake handshake) {
-        getLogger().info("Open connection");
+        getLogger().info("WebSocket connection established in the AfreecaTvChatClientHandler.");
     }
 
     @Override
     public void onClose(int code, @NotNull String reason, boolean remote) {
-        getLogger().info("close connection");
+        getLogger().info("WebSocket connection closed in the AfreecaTvChatClientHandler.");
     }
 
     @Override
-    public void onMessage(@NotNull String message) {
-        getLogger().info("receive message : " + message);
-    }
+    public void onMessage(@NotNull String message) {}
 
     @Override
-    public void onMessage(@NotNull ByteBuffer bytes) {
-        getLogger().info("receive byte message : " + bytes);
-    }
+    public void onMessage(@NotNull ByteBuffer bytes) {}
 
     @Override
     public void onMessageDecoded(@NotNull AccMessage message) {
-        getLogger().info("decode message : " + message);
+        crawler.getEvents().forEach(event -> event.onMessageReceive(message));
     }
 
     @Override
     public void onError(@NotNull Exception ex) {
         ex.printStackTrace();
+    }
+
+    public @NotNull AfreecaTvChatCrawler getCrawler() {
+        return crawler;
     }
 
 }
