@@ -62,10 +62,9 @@ public class AfreecaTvChatCrawler {
                 client = new AccClient(result, draft);
 
                 // Create and Bind SSL Context
-                SSLContext context = SSLContextBuilder.create()
-                        .loadTrustMaterial((chain, authType) -> true)
-                        .build();
-                client.setSocketFactory(context.getSocketFactory());
+                SSLContext sslContext = SSLContext.getInstance("TLS");
+                sslContext.init(null, null, null);
+                client.setSocketFactory(sslContext.getSocketFactory());
 
                 // Create and Add Client Handler
                 AccClientHandler handler = new AfreecaTvChatClientHandler();
@@ -93,8 +92,7 @@ public class AfreecaTvChatCrawler {
                 // Run if exception throws or client is not opened
                 client.close();
             } catch (InterruptedException | ExecutionException
-                     | NoSuchAlgorithmException | KeyStoreException
-                     | KeyManagementException e) {
+                     | NoSuchAlgorithmException | KeyManagementException e) {
                 e.printStackTrace();
             }
         });
