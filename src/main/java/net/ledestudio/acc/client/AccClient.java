@@ -9,6 +9,7 @@ import org.java_websocket.handshake.ServerHandshake;
 import org.jetbrains.annotations.NotNull;
 
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.util.Set;
 import java.util.logging.Logger;
 
@@ -51,16 +52,18 @@ public class AccClient extends WebSocketClient {
     @Override
     public void onMessage(String message) {
         handlers.forEach(handler -> handler.onMessage(message));
-
-        // decode message
-        AccMessageDecoder decoder = new AccMessageDecoder(message);
-        DecodedMessage decodedMessage = decoder.decode();
-        handlers.forEach(handler -> handler.onMessageDecoded(decodedMessage));
     }
 
     @Override
     public void onMessage(ByteBuffer bytes) {
         handlers.forEach(handler -> handler.onMessage(bytes));
+
+        // decode message
+        AccMessageDecoder decoder = new AccMessageDecoder(new String(bytes.array(), StandardCharsets.UTF_8));
+        DecodedMessage decodedMessage = decoder.decode();
+        if (decodedMessage != null) {
+            handlers.forEach(handler -> handler.onMessageDecoded(decodedMessage));
+        }
     }
 
     @Override
