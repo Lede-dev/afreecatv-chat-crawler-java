@@ -8,6 +8,8 @@ import java.nio.charset.StandardCharsets;
 
 public class AccConstants {
 
+    public static final int PING_PACKET_PERIOD_SECONDS = 60;
+
     public static final String F = "\u000c";
     public static final String ESC = "\u001b\t";
 

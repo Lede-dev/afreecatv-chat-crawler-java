@@ -6,6 +6,8 @@ import org.java_websocket.handshake.ServerHandshake;
 import org.jetbrains.annotations.NotNull;
 
 import java.nio.ByteBuffer;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 public class AfreecaTvChatClientHandler extends AccClientHandler {
 
@@ -23,6 +25,14 @@ public class AfreecaTvChatClientHandler extends AccClientHandler {
     @Override
     public void onClose(int code, @NotNull String reason, boolean remote) {
         getLogger().info("WebSocket connection closed in the AfreecaTvChatClientHandler.");
+        crawler.close();
+
+        if (crawler.isAutoReconnect()) {
+            Executors.newSingleThreadScheduledExecutor().schedule(() -> {
+                getLogger().info("Reconnecting WebSocket in AfreecaTvChatClientHandler.");
+                crawler.reconnect();
+            }, crawler.getReconnectDelay(), TimeUnit.MILLISECONDS);
+        }
     }
 
     @Override

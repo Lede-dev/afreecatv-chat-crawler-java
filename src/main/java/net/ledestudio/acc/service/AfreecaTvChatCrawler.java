@@ -8,7 +8,6 @@ import net.ledestudio.acc.http.AccHttpRequestResult;
 import net.ledestudio.acc.http.AccHttpRequester;
 import net.ledestudio.acc.util.AccConstants;
 import org.java_websocket.drafts.Draft_6455;
-import org.java_websocket.enums.ReadyState;
 import org.java_websocket.protocols.Protocol;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -17,17 +16,19 @@ import javax.net.ssl.SSLContext;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Set;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Executors;
+import java.util.concurrent.*;
 
 public class AfreecaTvChatCrawler {
 
     private AccClient client;
     private AccHttpRequestResult result;
 
+    private ScheduledExecutorService scheduler;
+
     private final @NotNull String url;
     private final Set<AfreecaTvMessageReceiveEvent> events;
+    private boolean autoReconnect;
+    private long reconnectDelay; // ms
 
     public AfreecaTvChatCrawler(@NotNull String bid, int bno) {
         this(bid, Integer.toString(bno));
@@ -38,8 +39,14 @@ public class AfreecaTvChatCrawler {
     }
 
     public AfreecaTvChatCrawler(@NotNull String afreecaTvLiveUrl) {
+        this(afreecaTvLiveUrl, false, 0);
+    }
+
+    public AfreecaTvChatCrawler(@NotNull String afreecaTvLiveUrl, boolean autoReconnect, long reconnectDelay) {
         this.url = afreecaTvLiveUrl;
         this.events = Sets.newHashSet();
+        this.autoReconnect = autoReconnect;
+        this.reconnectDelay = reconnectDelay;
     }
 
     public void registerMessageReceiveEvent(@NotNull AfreecaTvMessageReceiveEvent event) {
@@ -82,24 +89,10 @@ public class AfreecaTvChatCrawler {
                 // Wait Connecting
                 client.connectBlocking();
 
+                // Create Scheduler
                 if (client.isOpen()) {
-                    try {
-                        // Send Initial Packet
-                        client.send(AccConstants.createConnectPacket());
-                        client.send(AccConstants.createJoinPacket(result));
-
-                        // Repeatedly Sending Ping Packet
-                        while (client.getReadyState() == ReadyState.OPEN) {
-                            client.send(AccConstants.createPingPacket());
-                            Thread.sleep(1000 * 60); // Wait 60 Seconds
-                        }
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
+                    sendPacket();
                 }
-
-                // Run if exception throws or client is not opened
-                client.close();
             } catch (InterruptedException | ExecutionException
                      | NoSuchAlgorithmException | KeyManagementException e) {
                 e.printStackTrace();
@@ -107,10 +100,45 @@ public class AfreecaTvChatCrawler {
         });
     }
 
+    public void reconnect() {
+        if (client != null) {
+            try {
+                client.reconnectBlocking();
+                sendPacket();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
     public void close() {
+        if (scheduler != null) {
+            scheduler.shutdown();
+        }
         if (client != null) {
             client.close();
         }
+    }
+
+    private void sendPacket() {
+        if (client == null) {
+            return;
+        }
+
+        // Send Initial Packet
+        client.send(AccConstants.createConnectPacket());
+        client.send(AccConstants.createJoinPacket(result));
+
+        if (scheduler != null && !scheduler.isShutdown()) {
+            scheduler.shutdownNow();
+        }
+
+        // Repeatedly Sending Ping Packet
+        scheduler = Executors.newSingleThreadScheduledExecutor();
+        scheduler.scheduleAtFixedRate(() -> {
+            System.out.println("Send Ping Packet");
+            client.send(AccConstants.createPingPacket());
+        }, AccConstants.PING_PACKET_PERIOD_SECONDS, AccConstants.PING_PACKET_PERIOD_SECONDS, TimeUnit.SECONDS);
     }
 
     public @Nullable AccClient getClient() {
@@ -125,4 +153,19 @@ public class AfreecaTvChatCrawler {
         return url;
     }
 
+    public boolean isAutoReconnect() {
+        return autoReconnect;
+    }
+
+    public void setAutoReconnect(boolean autoReconnect) {
+        this.autoReconnect = autoReconnect;
+    }
+
+    public long getReconnectDelay() {
+        return reconnectDelay;
+    }
+
+    public void setReconnectDelay(long reconnectDelay) {
+        this.reconnectDelay = reconnectDelay;
+    }
 }
