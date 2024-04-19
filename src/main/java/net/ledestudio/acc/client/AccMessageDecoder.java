@@ -17,13 +17,20 @@ public class AccMessageDecoder {
 
     public @Nullable DecodedMessage decode() {
         String[] parts = textToDecode.split(AccConstants.F);
-        if (parts.length > 5 && !parts[1].equals("-1") && !parts[1].equals("1") && !parts[1].contains("|")) {
-            String senderId = parts[2];
-            String senderNickname = parts[6];
-            String message = parts[1];
-            return new DecodedMessage(result, senderId, senderNickname, message);
+
+        if (parts.length < 7) {
+            return null;
         }
-        return null;
+
+        if (parts[1].equals("-1") || parts[1].equals("1") || parts[1].contains("|") ||
+                parts[2].isEmpty() || parts[2].startsWith("fw=")) {
+            return null;
+        }
+
+        String senderId = parts[2];
+        String senderNickname = parts[6];
+        String message = parts[1];
+        return new DecodedMessage(result, senderId, senderNickname, message);
     }
 
 }
