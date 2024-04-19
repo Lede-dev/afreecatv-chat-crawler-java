@@ -82,6 +82,12 @@ public class AccHttpRequester {
                 return result;
             } catch (IOException e) {
                 System.err.println("An error occurred during HTTP request execution: " + e.getMessage());
+            } finally {
+                try {
+                    client.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
 
             return null;
