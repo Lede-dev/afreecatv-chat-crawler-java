@@ -15,8 +15,12 @@ import org.jetbrains.annotations.Nullable;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.CompletableFuture;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class AccHttpRequester {
+
+    private static final Logger LOGGER = Logger.getLogger(AccHttpRequester.class.getSimpleName());
 
     private final @NotNull String bid;
     private final @NotNull String bno;
@@ -81,7 +85,7 @@ public class AccHttpRequester {
                 result.put(AccHttpResponseType.BNO, bno);
                 return result;
             } catch (IOException e) {
-                System.err.println("An error occurred during HTTP request execution: " + e.getMessage());
+                LOGGER.log(Level.WARNING, "An error occurred during HTTP request execution: ", e);
             } finally {
                 try {
                     client.close();
