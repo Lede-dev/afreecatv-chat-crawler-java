@@ -55,7 +55,7 @@ or
 AfreecaTvChatCrawler crawler = new AfreecaTvChatCrawler("lilpa0309", "263127556");
 ```
 
-<br>
+</br>
 Next, register the AfreecaTvMessageReceiveEvent to handle message reception.
 
 ```java
@@ -67,6 +67,14 @@ crawler.registerMessageReceiveEvent(new AfreecaTvMessageReceiveEvent() {
     }
 });
 ```
+
+</br>
+Once all configurations are complete, you can start the crawler.
+
+```java
+crawler.connect();
+```
+
 </br>
 That's it! Here are a few points to keep in mind when using it.
 
