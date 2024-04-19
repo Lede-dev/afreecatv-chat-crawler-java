@@ -46,11 +46,22 @@ First, we create an instance of AfreecaTvChatCrawler. There are two ways to crea
 AfreecaTvChatCrawler crawler = new AfreecaTvChatCrawler("play.afreecatv.com/lilpa0309/263127556");
 ```
 
+or
+
+```java
+boolean autoReconnect = true;
+long autoReconnectDelayMilliSeconds = 1000;
+AfreecaTvChatCrawler crawler = new AfreecaTvChatCrawler(
+        "play.afreecatv.com/lilpa0309/263127556", autoReconnect, autoReconnectDelayMilliSeconds);
+```
+
 - Use AfreecaTV Broadcaster ID and Number
 ```java
 AfreecaTvChatCrawler crawler = new AfreecaTvChatCrawler("lilpa0309", 263127556);
 ```
+
 or
+
 ```java
 AfreecaTvChatCrawler crawler = new AfreecaTvChatCrawler("lilpa0309", "263127556");
 ```
