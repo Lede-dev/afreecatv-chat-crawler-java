@@ -2,7 +2,6 @@ package net.ledestudio.acc.client;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.time.ZoneId;
 import java.time.ZonedDateTime;
 
 public interface AccMessage {
@@ -13,6 +12,14 @@ public interface AccMessage {
 
     @NotNull String getMessage();
 
-    @NotNull ZonedDateTime getTimestamp(@NotNull ZoneId zone);
+    @NotNull ZonedDateTime getTimestamp();
+
+    @NotNull String getBroadcasterID();
+
+    @NotNull String getBroadcasterNumber();
+
+    @NotNull String getLiveBroadcastURL();
+
+    @NotNull String getLiveBroadcastTitle();
 
 }

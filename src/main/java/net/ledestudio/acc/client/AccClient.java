@@ -59,7 +59,7 @@ public class AccClient extends WebSocketClient {
         handlers.forEach(handler -> handler.onMessage(bytes));
 
         // decode message
-        AccMessageDecoder decoder = new AccMessageDecoder(new String(bytes.array(), StandardCharsets.UTF_8));
+        AccMessageDecoder decoder = new AccMessageDecoder(result, new String(bytes.array(), StandardCharsets.UTF_8));
         DecodedMessage decodedMessage = decoder.decode();
         if (decodedMessage != null) {
             handlers.forEach(handler -> handler.onMessageDecoded(decodedMessage));

@@ -1,13 +1,17 @@
 package net.ledestudio.acc.client;
 
+import net.ledestudio.acc.http.AccHttpRequestResult;
 import net.ledestudio.acc.util.AccConstants;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class AccMessageDecoder {
 
-    private final String textToDecode;
+    private final @NotNull AccHttpRequestResult result;
+    private final @NotNull String textToDecode;
 
-    public AccMessageDecoder(String textToDecode) {
+    public AccMessageDecoder(@NotNull AccHttpRequestResult result, @NotNull String textToDecode) {
+        this.result = result;
         this.textToDecode = textToDecode;
     }
 
@@ -17,7 +21,7 @@ public class AccMessageDecoder {
             String senderId = parts[2];
             String senderNickname = parts[6];
             String message = parts[1];
-            return new DecodedMessage(senderId, senderNickname, message);
+            return new DecodedMessage(result, senderId, senderNickname, message);
         }
         return null;
     }
