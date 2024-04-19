@@ -10,12 +10,20 @@ import java.util.HashMap;
 
 public class AccHttpRequestResult extends HashMap<AccHttpResponseType, String> {
 
-    public @NotNull URI toWebSocketURI() throws URISyntaxException {
-        return new URI(toWebSocketUrlString());
+    public @NotNull URI toWebSocketURI() {
+        try {
+            return new URI(toWebSocketUrlString());
+        } catch (URISyntaxException e) {
+            throw new RuntimeException(e);
+        }
     }
 
-    public @NotNull URL toWebSocketURL() throws MalformedURLException {
-        return new URL(toWebSocketUrlString());
+    public @NotNull URL toWebSocketURL() {
+        try {
+            return new URL(toWebSocketUrlString());
+        } catch (MalformedURLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public @NotNull String toWebSocketUrlString() {
@@ -25,6 +33,18 @@ public class AccHttpRequestResult extends HashMap<AccHttpResponseType, String> {
                 getOrDefault(AccHttpResponseType.CHPT, ""),
                 getOrDefault(AccHttpResponseType.BID, "")
         );
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        this.forEach((key, value) -> sb.append(key).append(":").append(value).append("\n"));
+        return sb.toString();
+    }
+
+    @Override
+    public AccHttpRequestResult clone() {
+        return (AccHttpRequestResult) super.clone();
     }
 
 }
